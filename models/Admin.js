@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const adminSchema = new mongoose.Schema({
 
-  username: {
+  name: {
     type: String,
     required: true
   },

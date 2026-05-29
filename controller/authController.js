@@ -6,7 +6,7 @@ import Admin from '../models/Admin.js';
 
 export const registerAdmin = async (req, res) =>{
     try{
-        const {username, email, password} = req.body;
+        const {name, email, password} = req.body;
         // check if admin already exist
         const exsitingAdmin = await Admin.findOne({email});
         if(exsitingAdmin){
@@ -19,7 +19,7 @@ export const registerAdmin = async (req, res) =>{
 
         // create new admin
         const admin = await Admin.create({
-            username,
+            name,
             email,
             password:hashedPassword
 
@@ -67,7 +67,7 @@ export const loginAdmin = async(req, res) => {
             message: "Admin logged in successfully", 
             admin:{
                 id: admin._id,
-                username: admin.username,
+                name: admin.name,
                 email: admin.email
             },
             token 
