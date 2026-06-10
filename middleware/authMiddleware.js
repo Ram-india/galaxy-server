@@ -3,6 +3,8 @@ import jwt from "jsonwebtoken";
 const authMiddleware = async (req, res, next) => {
 
   try {
+    // Allow CORS preflight requests through without authentication
+    if (req.method === 'OPTIONS') return next();
 
     const authHeader = req.headers.authorization;
 
