@@ -9,6 +9,8 @@ import {
 } from "../controller/projectController.js";
 
 import authMiddleware from "../middleware/authMiddleware.js";
+import requirePermission from "../middleware/requirePermission.js";
+import { PERMISSIONS } from "../config/permissions.js";
 import upload from "../middleware/upload.js";
 
 const router = express.Router();
@@ -21,6 +23,7 @@ router.get("/public/:id", getProject);
 router.post(
   "/",
   authMiddleware,
+  requirePermission(PERMISSIONS.PROJECT_CREATE),
   upload.array("images", 10),
   createProject
 );
@@ -28,18 +31,21 @@ router.post(
 router.get(
   "/",
   authMiddleware,
+  requirePermission(PERMISSIONS.PROJECT_VIEW),
   getProjects
 );
 
 router.get(
   "/:id",
   authMiddleware,
+  requirePermission(PERMISSIONS.PROJECT_VIEW),
   getProject
 );
 
 router.put(
   "/:id",
   authMiddleware,
+  requirePermission(PERMISSIONS.PROJECT_UPDATE),
   upload.array("images", 10),
   updateProject
 );
@@ -47,6 +53,7 @@ router.put(
 router.delete(
   "/:id",
   authMiddleware,
+  requirePermission(PERMISSIONS.PROJECT_DELETE),
   deleteProject
 );
 
