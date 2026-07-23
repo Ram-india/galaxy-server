@@ -1,6 +1,7 @@
 import HeroSlide from "../models/HeroSlide.js";
 import Job, { JOB_STATUS } from "../models/Job.js";
 import Testimonial from "../models/Testimonial.js";
+import Client from "../models/Client.js";
 
 /** Reads a Cloudinary upload regardless of storage-adapter version. */
 const readUploadedImage = (file) => ({
@@ -348,6 +349,136 @@ export const deleteTestimonial = async (req, res) => {
     res.status(200).json({ success: true, message: "Testimonial deleted" });
   } catch (error) {
     console.error("Delete Testimonial Error:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+/* -------------------------------------------------------------- clients */
+
+/** GET /api/content/clients/public — active client logos, in order. */
+export const getPublicClients = async (req, res) => {
+  try {
+    const clients = await Client.find({ isActive: true }).sort({
+      order: 1,
+      createdAt: 1,
+    });
+
+    res.status(200).json(clients);
+  } catch (error) {
+    console.error("Get Public Clients Error:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+/** GET /api/content/clients */
+export const getClients = async (req, res) => {
+  try {
+    const clients = await Client.find().sort({ order: 1, createdAt: 1 });
+    res.status(200).json(clients);
+  } catch (error) {
+    console.error("Get Clients Error:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+/** POST /api/content/clients */
+export const createClient = async (req, res) => {
+  try {
+    const { name } = req.body;
+
+    if (!name?.trim()) {
+      return res.status(400).json({ message: "A client name is required." });
+    }
+
+    // A logo makes the strip meaningful, so require one on create
+    if (!req.file) {
+      return res.status(400).json({ message: "Upload the client's logo." });
+    }
+
+    // New clients go to the end of the strip
+    const last = await Client.findOne().sort({ order: -1 });
+    const uploaded = readUploadedImage(req.file);
+
+    const client = await Client.create({
+      name: name.trim(),
+      website: req.body.website || "",
+      isActive:
+        req.body.isActive === undefined
+          ? true
+          : req.body.isActive === "true" || req.body.isActive === true,
+      order: last ? last.order + 1 : 0,
+      logo: uploaded.image,
+      logoPublicId: uploaded.imagePublicId,
+    });
+
+    res.status(201).json({ message: "Client added", client });
+  } catch (error) {
+    console.error("Create Client Error:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+/** PUT /api/content/clients/:id */
+export const updateClient = async (req, res) => {
+  try {
+    const client = await Client.findById(req.params.id);
+    if (!client) return res.status(404).json({ message: "Client not found" });
+
+    const { name, website, isActive } = req.body;
+
+    if (name !== undefined) client.name = name.trim();
+    if (website !== undefined) client.website = website;
+    if (isActive !== undefined) {
+      client.isActive = isActive === "true" || isActive === true;
+    }
+
+    if (req.file) {
+      const uploaded = readUploadedImage(req.file);
+      client.logo = uploaded.image;
+      client.logoPublicId = uploaded.imagePublicId;
+    }
+
+    await client.save();
+
+    res.status(200).json({ message: "Client updated", client });
+  } catch (error) {
+    console.error("Update Client Error:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+/** PATCH /api/content/clients/reorder — body: { ids: [...] } in display order. */
+export const reorderClients = async (req, res) => {
+  try {
+    const { ids } = req.body;
+
+    if (!Array.isArray(ids)) {
+      return res.status(400).json({ message: "Expected an array of ids." });
+    }
+
+    await Promise.all(
+      ids.map((id, index) =>
+        Client.updateOne({ _id: id }, { $set: { order: index } })
+      )
+    );
+
+    const clients = await Client.find().sort({ order: 1 });
+    res.status(200).json({ message: "Order saved", clients });
+  } catch (error) {
+    console.error("Reorder Clients Error:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+/** DELETE /api/content/clients/:id */
+export const deleteClient = async (req, res) => {
+  try {
+    const client = await Client.findByIdAndDelete(req.params.id);
+    if (!client) return res.status(404).json({ message: "Client not found" });
+
+    res.status(200).json({ success: true, message: "Client deleted" });
+  } catch (error) {
+    console.error("Delete Client Error:", error);
     res.status(500).json({ message: error.message });
   }
 };

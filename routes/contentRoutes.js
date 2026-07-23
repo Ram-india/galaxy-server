@@ -18,6 +18,12 @@ import {
   updateTestimonial,
   reorderTestimonials,
   deleteTestimonial,
+  getPublicClients,
+  getClients,
+  createClient,
+  updateClient,
+  reorderClients,
+  deleteClient,
 } from "../controller/contentController.js";
 
 import authMiddleware from "../middleware/authMiddleware.js";
@@ -39,11 +45,18 @@ const uploadSlideImage = createImageUpload({
   maxBytes: 4 * 1024 * 1024,
 });
 
+const uploadClientLogo = createImageUpload({
+  folder: "gps-clients",
+  field: "logo",
+  maxBytes: 2 * 1024 * 1024,
+});
+
 /* ------------------------------------------------------------------ public */
 
 router.get("/slides/public", getPublicSlides);
 router.get("/jobs/public", getPublicJobs);
 router.get("/testimonials/public", getPublicTestimonials);
+router.get("/clients/public", getPublicClients);
 
 /* --------------------------------------------------------------- protected */
 
@@ -70,5 +83,12 @@ router.post("/testimonials", canManage, uploadAvatarImage, createTestimonial);
 router.patch("/testimonials/reorder", canManage, reorderTestimonials);
 router.put("/testimonials/:id", canManage, uploadAvatarImage, updateTestimonial);
 router.delete("/testimonials/:id", canManage, deleteTestimonial);
+
+router.get("/clients", canManage, getClients);
+router.post("/clients", canManage, uploadClientLogo, createClient);
+// Declared before "/:id" so "reorder" is not read as an id
+router.patch("/clients/reorder", canManage, reorderClients);
+router.put("/clients/:id", canManage, uploadClientLogo, updateClient);
+router.delete("/clients/:id", canManage, deleteClient);
 
 export default router;

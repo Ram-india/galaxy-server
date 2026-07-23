@@ -32,7 +32,7 @@ export const notifyEnquiryCreated = (enquiry) =>
     title: "New enquiry received",
     message: `${enquiry.fullName} submitted a ${
       enquiry.projectType || "solar"
-    } enquiry from the website.`,
+    } enquiry via ${enquiry.source || "the website"}.`,
     module: "enquiry",
     entityId: enquiry._id,
     entityModel: "Enquiry",
@@ -42,6 +42,7 @@ export const notifyEnquiryCreated = (enquiry) =>
       phone: enquiry.phone,
       projectType: enquiry.projectType,
       installationType: enquiry.installationType,
+      source: enquiry.source,
     },
   });
 

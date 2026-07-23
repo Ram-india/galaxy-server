@@ -5,6 +5,7 @@ import Blog, {
 } from "../models/Blog.js";
 import cloudinary from "../config/cloudinary.js";
 import { readUploadedImage } from "../middleware/imageUpload.js";
+import { shareOnPublish } from "../services/socialPublisher.js";
 
 /** Escapes user input before it is used inside a regex. */
 const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");

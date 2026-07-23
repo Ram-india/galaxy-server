@@ -49,6 +49,14 @@ const enquirySchema = new mongoose.Schema(
       trim: true,
     },
 
+    /** Where the enquiry came from, e.g. "Website", "Solar Calculator". */
+    source: {
+      type: String,
+      trim: true,
+      default: "Website",
+      index: true,
+    },
+
     status: {
       type: String,
       enum: [
